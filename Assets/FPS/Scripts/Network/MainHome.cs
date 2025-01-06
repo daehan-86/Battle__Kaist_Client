@@ -3,15 +3,17 @@ using System.Net.WebSockets;
 using System.Threading;
 using UnityEngine;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using UnityEngine.UI;
 using System.Text;
+using UnityEngine.SceneManagement;
 
 public class MainHome : MonoBehaviour
 {
     public class Message
     {
         public string Type { get; set; } // 메시지 타입 (예: "REQUEST_NAVER_LOGIN")
-        public string Data { get; set; } // 메시지 데이터
+        public object Data { get; set; } // 메시지 데이터
     }
 
     private ClientWebSocket _webSocket;
@@ -31,7 +33,9 @@ public class MainHome : MonoBehaviour
             await RequestInit();
 
             // 서버 응답 수신
-            //await ListenForMessages();
+            await RequestUserData();
+            
+            await ListenForMessages();
         }
         catch (Exception ex)
         {
@@ -42,7 +46,7 @@ public class MainHome : MonoBehaviour
     {
         var message = new Message
         {
-            Type = "CREATE_USER",
+            Type = "REQUEST_INIT",
             Data = WebSocketService.naverId
         };
 
@@ -51,7 +55,56 @@ public class MainHome : MonoBehaviour
         var messageBytes = Encoding.UTF8.GetBytes(jsonMessage);
 
         await _webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
-        Debug.Log("이름생성 요청함");
+        Debug.Log("유저데이터 초기화 요청함");
+    }
+    public async Task RequestUserData()
+    {
+        var message = new Message
+        {
+            Type = "REQUEST_USER_DATA",
+            Data = null
+        };
+
+        // JSON 직렬화
+        string jsonMessage = JsonConvert.SerializeObject(message);
+        var messageBytes = Encoding.UTF8.GetBytes(jsonMessage);
+
+        await _webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+        Debug.Log("유저데이터 요청함");
+    }
+    private async Task ListenForMessages()
+    {
+        var buffer = new byte[1024 * 4];
+
+        while (_webSocket.State == WebSocketState.Open)
+        {
+            try
+            {
+                var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                if (result.MessageType == WebSocketMessageType.Text)
+                {
+                    var responseMessage = Encoding.UTF8.GetString(buffer, 0, result.Count);
+                    Debug.Log($"서버 응답 수신: {responseMessage}");
+
+                    // JSON 역직렬화
+                    var response = JsonConvert.DeserializeObject<Message>(responseMessage);
+                    if (response?.Type == "RESPONSE_USER_DATA")
+                    {
+                        //화면 갱신
+                        break;
+                    }
+                }
+                else if (result.MessageType == WebSocketMessageType.Close)
+                {
+                    Debug.Log("WebSocket 연결이 종료되었습니다.");
+                    await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "닫힘", CancellationToken.None);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"메시지 수신 오류: {ex.Message}");
+            }
+        }
     }
     public async void StartGame()
     {
@@ -61,5 +114,18 @@ public class MainHome : MonoBehaviour
     public async void ExitGame()
     {
 
+        var message = new Message
+        {
+            Type = "EXIT",
+            Data = null
+        };
+
+        // JSON 직렬화
+        string jsonMessage = JsonConvert.SerializeObject(message);
+        var messageBytes = Encoding.UTF8.GetBytes(jsonMessage);
+
+        await _webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+        Debug.Log("소켓 삭제 요청함");
+        Application.Quit();
     }
 }
