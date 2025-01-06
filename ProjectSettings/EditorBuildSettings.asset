@@ -17,4 +17,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/FPS/Scenes/MainScene.unity
     guid: d794a2ef8ba31d847ad3c19d03e2ddb9
+  - enabled: 1
+    path: Assets/FPS/Scenes/NewUserScene.unity
+    guid: 88129e3335e96ee4d9263d2ed85771fc
+  - enabled: 1
+    path: Assets/FPS/Scenes/MainHomeScene.unity
+    guid: 58a65f11ca8047c478f57629cdc0134d
   m_configObjects: {}
+  m_UseUCBPForAssetBundles: 0
