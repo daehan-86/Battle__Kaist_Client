@@ -17,6 +17,7 @@ public class MainHome : MonoBehaviour
     }
 
     private ClientWebSocket _webSocket;
+    private bool isqueue = false;
     private string _serverUri = "ws://172.10.7.27:5000/Home"; // WebSocket 서버 URI
     private async void Start()
     {
@@ -93,6 +94,12 @@ public class MainHome : MonoBehaviour
                         //화면 갱신
                         break;
                     }
+                    else if(response?.Type == "JOIN_GAME_ROOM")
+                    {
+                        Debug.Log("방참가~");
+
+                        SceneManager.LoadScene("LoadingScene");
+                    }
                 }
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
@@ -108,12 +115,25 @@ public class MainHome : MonoBehaviour
     }
     public async void StartGame()
     {
+        var message = new Message
+        {
+            Type = "ENTER_QUEUE",
+            Data = null
+        };
+        isqueue = true;
+        // JSON 직렬화
+        string jsonMessage = JsonConvert.SerializeObject(message);
+        var messageBytes = Encoding.UTF8.GetBytes(jsonMessage);
 
+        await _webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
+        Debug.Log("소켓 삭제 요청함");
+
+        await ListenForMessages();
     }
 
     public async void ExitGame()
     {
-
+        isqueue = false;
         var message = new Message
         {
             Type = "EXIT",
