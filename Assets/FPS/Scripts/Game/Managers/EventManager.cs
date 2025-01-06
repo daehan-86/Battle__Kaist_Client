@@ -11,15 +11,17 @@ namespace Unity.FPS.Game
     public static class EventManager
     {
         static readonly Dictionary<Type, Action<GameEvent>> s_Events = new Dictionary<Type, Action<GameEvent>>();
+        // Type: 이벤트 유형, Action<GameEvent>: 이벤트 핸들러 매핑
 
         static readonly Dictionary<Delegate, Action<GameEvent>> s_EventLookups =
             new Dictionary<Delegate, Action<GameEvent>>();
+        // Delegate: 이벤트 발생 시, 이벤트 핸들러를 호출하는(등록하는) 메서드(델리게이트) or 이벤트 리스너, Action<GameEvent>: 호출당하는 이벤트 핸들러
 
-        public static void AddListener<T>(Action<T> evt) where T : GameEvent
+        public static void AddListener<T>(Action<T> evt) where T : GameEvent // T타입은 GameEvent 클래스를 상속한 타입, T타입 이벤트 핸들러를 받아서 s_Events에 추가하는 메서드
         {
             if (!s_EventLookups.ContainsKey(evt))
             {
-                Action<GameEvent> newAction = (e) => evt((T) e);
+                Action<GameEvent> newAction = (e) => evt((T) e); // newAction은 Action<GameEvent>타입의 델리게이트, GameEvent타입을 받아서 T타입으로 변환 후 evt 호출
                 s_EventLookups[evt] = newAction;
 
                 if (s_Events.TryGetValue(typeof(T), out Action<GameEvent> internalAction))
