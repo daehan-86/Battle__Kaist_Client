@@ -11,6 +11,7 @@ public class PlayerStateSender : MonoBehaviour
 {
     private ClientWebSocket _webSocket;
     public PlayerCharacterController PlayerController; // PlayerCharacterController 연결
+    public PlayerWeaponsManager WeaponManager; // PlayerCharacterController 연결
     public float sendInterval = 0.02f; // 전송 간격
 
     private float _lastSendTime;
@@ -52,9 +53,10 @@ public class PlayerStateSender : MonoBehaviour
         PlayerState playerState = new PlayerState
         {
             Type = "re",
-            position = new Vector33{ x=position.x,y=position.y,z=position.z },
-            rotation = new Vector33 { x=rotationEuler.x, y=rotationEuler.y, z=rotationEuler.z },
-            health = health // 체력 정보 추가
+            position = new Vector33 { x = position.x, y = position.y, z = position.z },
+            rotation = new Vector33 { x = rotationEuler.x, y = rotationEuler.y, z = rotationEuler.z },
+            health = health, // 체력 정보 추가
+            hasFired = WeaponManager.hasFired
         };
         var settings = new JsonSerializerSettings
         {
@@ -84,6 +86,7 @@ public class PlayerState
     public Vector33 position;
     public Vector33 rotation;
     public float health; // 체력 정보 추가
+    public bool hasFired;
 }
 
 public class Vector33
