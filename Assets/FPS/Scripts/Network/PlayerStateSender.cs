@@ -11,7 +11,7 @@ public class PlayerStateSender : MonoBehaviour
 {
     private ClientWebSocket _webSocket;
     public PlayerCharacterController PlayerController; // PlayerCharacterController 연결
-    public float sendInterval = 0.1f; // 전송 간격
+    public float sendInterval = 0.02f; // 전송 간격
 
     private float _lastSendTime;
 
@@ -65,7 +65,7 @@ public class PlayerStateSender : MonoBehaviour
         var messageBytes = Encoding.UTF8.GetBytes(jsonMessage);
 
         await _webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
-        Debug.Log("게임 참가 메시지를 서버로 전송했습니다.");
+        //Debug.Log("게임 참가 메시지를 서버로 전송했습니다.");
     }
 
     private void OnApplicationQuit()
