@@ -15,7 +15,7 @@ public class PlayerStateSender : MonoBehaviour
 
     private float _lastSendTime;
 
-    async void Start()
+    void Start()
     {
         // WebSocket 초기화
         _webSocket = WebSocketService.WebSocket;
@@ -52,8 +52,8 @@ public class PlayerStateSender : MonoBehaviour
         PlayerState playerState = new PlayerState
         {
             Type = "re",
-            position = position,
-            rotation = rotationEuler,
+            position = new Vector33{ x=position.x,y=position.y,z=position.z },
+            rotation = new Vector33 { x=rotationEuler.x, y=rotationEuler.y, z=rotationEuler.z },
             health = health // 체력 정보 추가
         };
         var settings = new JsonSerializerSettings
@@ -61,7 +61,7 @@ public class PlayerStateSender : MonoBehaviour
             ReferenceLoopHandling = ReferenceLoopHandling.Ignore
         };
         // JSON 직렬화
-        string jsonMessage = JsonConvert.SerializeObject(playerState,settings);
+        string jsonMessage = JsonConvert.SerializeObject(playerState);
         var messageBytes = Encoding.UTF8.GetBytes(jsonMessage);
 
         await _webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
@@ -81,7 +81,14 @@ public class PlayerStateSender : MonoBehaviour
 public class PlayerState
 {
     public string Type;
-    public Vector3 position;
-    public Vector3 rotation;
+    public Vector33 position;
+    public Vector33 rotation;
     public float health; // 체력 정보 추가
+}
+
+public class Vector33
+{
+    public float x;
+    public float y;
+    public float z;
 }
