@@ -48,32 +48,27 @@ public class CreateNup : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     async void Start()
     {
-        Debug.Log("0000");
-        await Task.Delay(1000);
-
-        Debug.Log("1111");
         await ListenForMessages();
-        Debug.Log("5555");
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if (response != null && response.p != null)
+        {
+            SpawnObjects(); // 프레임마다 위치 및 회전 업데이트
+        }
     }
     private bool isProcessing = false;
     private async Task ListenForMessages()
     {
         var buffer = new byte[1024 * 8];
 
-        Debug.Log("2222");
         while (_webSocket.State == WebSocketState.Open)
         {
             try
             {
-                Debug.Log("3333");
                 var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                Debug.Log("4444");
                 if (isProcessing)
                 {
                     Debug.LogWarning("이미 작업 중입니다. 새 요청을 무시합니다.");
@@ -90,10 +85,8 @@ public class CreateNup : MonoBehaviour
                     //Debug.Log(response.ToString());
                     if (response?.t == "RE")
                     {
-                        Debug.Log("aaaa");
-                        SpawnObjects();
+                        //SpawnObjects();
                     }
-                    Debug.Log("aaaa");
                 }
                 else if (result.MessageType == WebSocketMessageType.Close)
                 {
