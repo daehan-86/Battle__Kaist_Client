@@ -16,6 +16,11 @@ public class LoadingGame : MonoBehaviour
         public string Type { get; set; } // 메시지 타입 (예: "REQUEST_NAVER_LOGIN")
         public string Data { get; set; } // 메시지 데이터
     }
+    public class Message2
+    {
+        public string t { get; set; } // 메시지 타입 (예: "REQUEST_NAVER_LOGIN")
+        public object Data { get; set; } // 메시지 데이터
+    }
     private ClientWebSocket _webSocket;
     private string _serverUri = "ws://172.10.7.27:5000/game0"; // WebSocket 서버 URI
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -76,8 +81,8 @@ public class LoadingGame : MonoBehaviour
                     Debug.Log($"서버 응답 수신: {responseMessage}");
 
                     // JSON 역직렬화
-                    var response = JsonConvert.DeserializeObject<Message>(responseMessage);
-                    if (response?.Type == "RE")
+                    var response = JsonConvert.DeserializeObject<Message2>(responseMessage);
+                    if (response?.t == "RE")
                     {
                         SceneManager.LoadScene("MainScene");
                         break;

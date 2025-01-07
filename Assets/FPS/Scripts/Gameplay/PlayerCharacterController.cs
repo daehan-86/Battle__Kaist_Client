@@ -7,6 +7,9 @@ namespace Unity.FPS.Gameplay
     [RequireComponent(typeof(CharacterController), typeof(PlayerInputHandler), typeof(AudioSource))]
     public class PlayerCharacterController : MonoBehaviour
     {
+        public Vector3 CurrentPosition => transform.position;
+        public Quaternion CurrentRotation => transform.rotation;
+        public float CurrentHealth => m_Health.CurrentHealth;
         [Header("References")] [Tooltip("Reference to the main camera used for the player")]
         public Camera PlayerCamera;
 
@@ -384,6 +387,7 @@ namespace Unity.FPS.Gameplay
 
                 CharacterVelocity = Vector3.ProjectOnPlane(CharacterVelocity, hit.normal);
             }
+            
         }
 
         // Returns true if the slope angle represented by the given normal is under the slope angle limit of the character controller
