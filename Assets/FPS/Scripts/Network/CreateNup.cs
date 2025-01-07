@@ -8,17 +8,23 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using NUnit.Framework;
 using System.Collections.Generic;
+using Unity.FPS.Game;
+using Unity.FPS.Gameplay;
 
 public class CreateNup : MonoBehaviour
 {
     public GameObject objectToDuplicate;
     private ClientWebSocket _webSocket = WebSocketService.WebSocket;
+    [SerializeField] private WeaponController weaponController;
+    [SerializeField] private Vector3 firePosition;
+    [SerializeField] private Vector3 fireDirection;
     public Message response;
     private List<GameObject> spawnedObjects = new List<GameObject>(); // 복제된 객체 목록
     public class GamePlayer
     {
         public string Id { get; set; } // 플레이어 고유 ID
         public string name { get; set; }
+        public string naverId { get; set; }
         public object socket { get; set; } // 플레이어 이름
         public Vector3 xyz { get; set; }
         public Vector3 dir { get; set; }
@@ -34,9 +40,9 @@ public class CreateNup : MonoBehaviour
     }
     public class Bullet
     {
-        public string Id { get; set; } // 플레이어 고유 ID
+        public string naverId { get; set; } // 플레이어 고유 ID
         public Vector3 xyz { get; set; }
-        public float dir { get; set; } = 0;
+        public Vector3 dir { get; set; }
     }
     public class Message
     {
@@ -53,10 +59,11 @@ public class CreateNup : MonoBehaviour
 
     // Update is called once per frame
     void Update()
-    {
+    {   
         if (response != null && response.p != null)
         {
             SpawnObjects(); // 프레임마다 위치 및 회전 업데이트
+            ShootEvent();
         }
     }
     private bool isProcessing = false;
@@ -128,33 +135,47 @@ public class CreateNup : MonoBehaviour
         }
 
         // 위치 및 방향 업데이트
+        int k = 0;
         for (int i = 0; i < count; i++)
         {
             var obj = response.p[i];
+            if (obj.naverId == WebSocketService.naverId)
+            {
+                continue;
+            }
             Vector3 position = new Vector3(obj.xyz.x,obj.xyz.y,obj.xyz.z);
             Quaternion rotation = Quaternion.Euler(new Vector3(obj.dir.x, obj.dir.y, obj.dir.z));
-
             // Transform 업데이트
-            spawnedObjects[i].transform.position = Vector3.Lerp(spawnedObjects[i].transform.position, position, Time.deltaTime * 10f);
-            spawnedObjects[i].transform.rotation = Quaternion.Slerp(spawnedObjects[i].transform.rotation, rotation, Time.deltaTime * 10f);
+            spawnedObjects[k].transform.position = Vector3.Lerp(spawnedObjects[k].transform.position, position, Time.deltaTime * 10f);
+            spawnedObjects[k].transform.rotation = Quaternion.Slerp(spawnedObjects[k].transform.rotation, rotation, Time.deltaTime * 10f);
+            k++;
         }
-        //// 입력된 위치와 방향에 따라 객체 생성
-        //for (int i = 0; i < response.p.Count; i++)
-        //{   
-        //    var obj = response.p[i];
-        //    // 위치 설정
-        //    Vector3 position = obj.xyz;
+    }
+    void ShootEvent()
+    {
+        int count = response.b.Count;
 
-        //    // 회전 설정 (Euler Angles를 Quaternion으로 변환)
-        //    Quaternion rotation = Quaternion.Euler(obj.dir);
+        for(int i = 0; i < count; i++)
+        {
+            var obj = response.b[i];
+            if (obj.naverId == WebSocketService.naverId)
+            {
+                continue;
+            }
+            Vector3 shootPosition = new Vector3(obj.xyz.x, obj.xyz.y, obj.xyz.z); // 발사 위치
+            Vector3 shootDirection = new Vector3(obj.dir.x, obj.dir.y, obj.dir.z);    // 발사 방향
+            SpawnBullet(shootPosition, shootDirection);
+        }
+        // 필요한 만큼 객체 생성
+    }
 
-        //    // 객체 복사 및 배치
-        //    GameObject newObject = Instantiate(objectToDuplicate, position, rotation);
+    public void SpawnBullet(Vector3 position, Vector3 direction)
+    {
+        // ProjectileBase prefab을 직접 Instantiate
+        ProjectileBase newProjectile = Instantiate(weaponController.ProjectilePrefab, position, Quaternion.LookRotation(direction));
 
-        //    // 이름 지정 (선택 사항)
-        //    newObject.name = $"{objectToDuplicate.name}_Copy_{i + 1}";
 
-        //    //Debug.Log($"Spawned: {newObject.name} at {position} with rotation {spawnRotations[i]}");
-        //}
+        // 별도의 Shoot 로직 필요하면 호출
+        newProjectile.Shoot(gameObject,position,direction); // or override Shoot if needed
     }
 }

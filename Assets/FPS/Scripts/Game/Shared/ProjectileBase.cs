@@ -23,5 +23,23 @@ namespace Unity.FPS.Game
 
             OnShoot?.Invoke();
         }
+        public void Shoot(GameObject customOwner, Vector3 pos, Vector3 dir)
+        {
+            Owner = customOwner;
+
+            // 원하는 위치로 설정
+            transform.position = pos;
+
+            // 원하는 방향으로 회전
+            transform.rotation = Quaternion.LookRotation(dir);
+
+            // 추가적으로 내부 변수도 세팅
+            InitialPosition = pos;
+            InitialDirection = dir.normalized;
+            InheritedMuzzleVelocity = Vector3.zero;
+            InitialCharge = 0f;
+
+            OnShoot?.Invoke();
+        }
     }
 }

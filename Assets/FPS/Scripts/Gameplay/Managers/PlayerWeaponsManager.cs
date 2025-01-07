@@ -92,7 +92,7 @@ namespace Unity.FPS.Gameplay
         float m_TimeStartedWeaponSwitch;
         WeaponSwitchState m_WeaponSwitchState;
         int m_WeaponSwitchNewWeaponIndex;
-
+        public bool hasFired = false;
         void Start()
         {
             ActiveWeaponIndex = -1;
@@ -139,7 +139,7 @@ namespace Unity.FPS.Gameplay
                 IsAiming = m_InputHandler.GetAimInputHeld();
 
                 // handle shooting
-                bool hasFired = activeWeapon.HandleShootInputs(
+                hasFired = activeWeapon.HandleShootInputs(
                     m_InputHandler.GetFireInputDown(),
                     m_InputHandler.GetFireInputHeld(),
                     m_InputHandler.GetFireInputReleased());

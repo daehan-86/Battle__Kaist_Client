@@ -489,6 +489,38 @@ namespace Unity.FPS.Game
             OnShoot?.Invoke();
             OnShootProcessed?.Invoke();
         }
+        public void HandleShoot(Vector3 position, Vector3 direction)
+        {
+            int bulletsPerShotFinal = ShootType == WeaponShootType.Charge
+                ? Mathf.CeilToInt(CurrentCharge * BulletsPerShot)
+                : BulletsPerShot;
+
+            // 총알 스폰 및 방향 설정
+            for (int i = 0; i < bulletsPerShotFinal; i++)
+            {
+                Vector3 shotDirection = direction; // 방향을 외부에서 입력받음
+                ProjectileBase newProjectile = Instantiate(ProjectilePrefab, position,
+                    Quaternion.LookRotation(shotDirection));
+                newProjectile.Shoot(this);
+            }
+
+            // 머즐 플래시 (선택)
+            if (MuzzleFlashPrefab != null)
+            {
+                GameObject muzzleFlashInstance = Instantiate(MuzzleFlashPrefab, position, Quaternion.LookRotation(direction));
+                if (UnparentMuzzleFlash)
+                {
+                    muzzleFlashInstance.transform.SetParent(null);
+                }
+                Destroy(muzzleFlashInstance, 2f);
+            }
+
+            // 발사 소리 (선택)
+            if (ShootSfx && !UseContinuousShootSound)
+            {
+                m_ShootAudioSource.PlayOneShot(ShootSfx);
+            }
+        }
 
         public Vector3 GetShotDirectionWithinSpread(Transform shootTransform)
         {
