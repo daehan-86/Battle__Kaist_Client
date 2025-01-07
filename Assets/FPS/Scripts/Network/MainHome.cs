@@ -7,7 +7,6 @@ using Newtonsoft.Json;
 using UnityEngine.UI;
 using System.Text;
 using UnityEngine.SceneManagement;
-
 public class MainHome : MonoBehaviour
 {
     public class Message
@@ -96,8 +95,8 @@ public class MainHome : MonoBehaviour
                     }
                     else if(response?.Type == "JOIN_GAME_ROOM")
                     {
-                        Debug.Log("방참가~");
-
+                        WebSocketService.roomId = Convert.ToInt32(response.Data);
+                        Debug.Log($"{WebSocketService.roomId}번 방참가~");
                         SceneManager.LoadScene("LoadingScene");
                     }
                 }
