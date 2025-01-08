@@ -90,9 +90,16 @@ public class CreateNup : MonoBehaviour
                     // JSON 역직렬화
                     response = JsonConvert.DeserializeObject<Message>(responseMessage);
                     //Debug.Log(response.ToString());
-                    if (response?.t == "RE")
+                    if (response?.t == "WIN")
                     {
                         //SpawnObjects();
+                        //await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
+                        SceneManager.LoadScene("WinScene");
+                    }
+                    else if(response?.t == "YOU_DIE")
+                    {
+                        //await _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing connection", CancellationToken.None);
+                        SceneManager.LoadScene("LoseScene");
                     }
                 }
                 else if (result.MessageType == WebSocketMessageType.Close)
@@ -143,8 +150,8 @@ public class CreateNup : MonoBehaviour
             {
                 continue;
             }
-            Vector3 position = new Vector3(obj.xyz.x,obj.xyz.y,obj.xyz.z);
-            Quaternion rotation = Quaternion.Euler(new Vector3(0, obj.dir.y, obj.dir.z));
+            Vector3 position = new Vector3(obj.xyz.x,obj.xyz.y+1,obj.xyz.z);
+            Quaternion rotation = Quaternion.Euler(new Vector3(0, obj.dir.y+90, obj.dir.z));
             // Transform 업데이트
             spawnedObjects[k].transform.position = Vector3.Lerp(spawnedObjects[k].transform.position, position, Time.deltaTime * 10f);
             spawnedObjects[k].transform.rotation = Quaternion.Slerp(spawnedObjects[k].transform.rotation, rotation, Time.deltaTime * 10f);
