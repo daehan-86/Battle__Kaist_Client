@@ -16,8 +16,8 @@ public class CreateNup : MonoBehaviour
     public GameObject objectToDuplicate;
     private ClientWebSocket _webSocket = WebSocketService.WebSocket;
     [SerializeField] private WeaponController weaponController;
-    [SerializeField] private Vector3 firePosition;
-    [SerializeField] private Vector3 fireDirection;
+    //[SerializeField] private Vector3 firePosition;
+    //[SerializeField] private Vector3 fireDirection;
     public Message response;
     private List<GameObject> spawnedObjects = new List<GameObject>(); // 복제된 객체 목록
     public class GamePlayer
@@ -144,7 +144,7 @@ public class CreateNup : MonoBehaviour
                 continue;
             }
             Vector3 position = new Vector3(obj.xyz.x,obj.xyz.y,obj.xyz.z);
-            Quaternion rotation = Quaternion.Euler(new Vector3(obj.dir.x, obj.dir.y, obj.dir.z));
+            Quaternion rotation = Quaternion.Euler(new Vector3(0, obj.dir.y, obj.dir.z));
             // Transform 업데이트
             spawnedObjects[k].transform.position = Vector3.Lerp(spawnedObjects[k].transform.position, position, Time.deltaTime * 10f);
             spawnedObjects[k].transform.rotation = Quaternion.Slerp(spawnedObjects[k].transform.rotation, rotation, Time.deltaTime * 10f);
@@ -163,10 +163,21 @@ public class CreateNup : MonoBehaviour
                 continue;
             }
             Vector3 shootPosition = new Vector3(obj.xyz.x, obj.xyz.y, obj.xyz.z); // 발사 위치
-            Vector3 shootDirection = new Vector3(obj.dir.x, obj.dir.y, obj.dir.z);    // 발사 방향
-            SpawnBullet(shootPosition, shootDirection);
+            float pitchRad = obj.dir.x * Mathf.Deg2Rad;
+            float yawRad = obj.dir.y * Mathf.Deg2Rad;
+
+            // 2) 방향 벡터 계산
+            Vector3 direction;
+            direction.x = Mathf.Cos(pitchRad) * Mathf.Sin(yawRad);
+            direction.y = -Mathf.Sin(pitchRad);
+            direction.z = Mathf.Cos(pitchRad) * Mathf.Cos(yawRad);
+
+            // 3) 필요하다면 정규화
+            direction.Normalize();
+            SpawnBullet(shootPosition, direction);
         }
         // 필요한 만큼 객체 생성
+        response.b.Clear();
     }
 
     public void SpawnBullet(Vector3 position, Vector3 direction)

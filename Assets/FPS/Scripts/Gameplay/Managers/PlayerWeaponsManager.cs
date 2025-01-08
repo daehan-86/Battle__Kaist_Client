@@ -83,6 +83,7 @@ namespace Unity.FPS.Gameplay
         WeaponController[] m_WeaponSlots = new WeaponController[9]; // 9 available weapon slots
         PlayerInputHandler m_InputHandler;
         PlayerCharacterController m_PlayerCharacterController;
+        public Vector3 Weapon_p;
         float m_WeaponBobFactor;
         Vector3 m_LastCharacterPosition;
         Vector3 m_WeaponMainLocalPosition;
@@ -123,7 +124,7 @@ namespace Unity.FPS.Gameplay
         {
             // shoot handling
             WeaponController activeWeapon = GetActiveWeapon();
-
+            Weapon_p = activeWeapon.WeaponMuzzle.position;
             if (activeWeapon != null && activeWeapon.IsReloading)
                 return;
 

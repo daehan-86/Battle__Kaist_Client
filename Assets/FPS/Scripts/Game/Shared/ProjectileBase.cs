@@ -34,8 +34,8 @@ namespace Unity.FPS.Game
             transform.rotation = Quaternion.LookRotation(dir);
 
             // 추가적으로 내부 변수도 세팅
-            InitialPosition = pos;
-            InitialDirection = dir.normalized;
+            InitialPosition = transform.position;
+            InitialDirection = dir;
             InheritedMuzzleVelocity = Vector3.zero;
             InitialCharge = 0f;
 
