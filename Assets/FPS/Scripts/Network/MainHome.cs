@@ -16,6 +16,8 @@ public class MainHome : MonoBehaviour
     }
 
     private ClientWebSocket _webSocket;
+    public Text timerText; // TimerText 오브젝트를 드래그해서 연결
+    private float elapsedTime = 0f; // 타이머 값
     private bool isqueue = false;
     private string _serverUri = "ws://172.10.7.27:5000/Home"; // WebSocket 서버 URI
     private async void Start()
@@ -78,6 +80,7 @@ public class MainHome : MonoBehaviour
 
         while (_webSocket.State == WebSocketState.Open)
         {
+            if (!isqueue) break;
             try
             {
                 var result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -114,20 +117,26 @@ public class MainHome : MonoBehaviour
     }
     public async void StartGame()
     {
+        isqueue = !isqueue;
         var message = new Message
         {
-            Type = "ENTER_QUEUE",
+            Type = (isqueue?"ENTER_QUEUE":"ERASE_QUEUE"),
             Data = null
         };
-        isqueue = true;
         // JSON 직렬화
         string jsonMessage = JsonConvert.SerializeObject(message);
         var messageBytes = Encoding.UTF8.GetBytes(jsonMessage);
 
         await _webSocket.SendAsync(new ArraySegment<byte>(messageBytes), WebSocketMessageType.Text, true, CancellationToken.None);
-        Debug.Log("소켓 삭제 요청함");
-
-        await ListenForMessages();
+        if (isqueue)
+        {
+            timerText.text = "SEARCHING..";
+            await ListenForMessages();
+        }
+        else
+        {
+            timerText.text = "GAME START";
+        }
     }
 
     public async void ExitGame()
