@@ -13,7 +13,7 @@ public class PlayerStateSender : MonoBehaviour
     public PlayerCharacterController PlayerController; // PlayerCharacterController 연결
     public PlayerWeaponsManager WeaponManager; // PlayerCharacterController 연결
     public float sendInterval = 0.02f; // 전송 간격
-
+    Quaternion cameraRotation = Camera.main.transform.rotation;
     private float _lastSendTime;
 
     void Start()
@@ -32,6 +32,7 @@ public class PlayerStateSender : MonoBehaviour
 
     void Update()
     {
+        cameraRotation = Camera.main.transform.rotation;
         // 지정된 간격마다 위치 데이터 전송
         if (Time.time - _lastSendTime >= sendInterval)
         {
@@ -54,9 +55,10 @@ public class PlayerStateSender : MonoBehaviour
         {
             Type = "re",
             position = new Vector33 { x = position.x, y = position.y, z = position.z },
-            rotation = new Vector33 { x = rotationEuler.x, y = rotationEuler.y, z = rotationEuler.z },
+            rotation = new Vector33 { x = cameraRotation.eulerAngles.x, y = rotationEuler.y, z = rotationEuler.z },
             health = health, // 체력 정보 추가
-            hasFired = WeaponManager.hasFired
+            hasFired = Input.GetMouseButton(0),
+            b_position = new Vector33 { x = WeaponManager.Weapon_p.x, y = WeaponManager.Weapon_p.y, z = WeaponManager.Weapon_p.z }
         };
         var settings = new JsonSerializerSettings
         {
@@ -87,6 +89,7 @@ public class PlayerState
     public Vector33 rotation;
     public float health; // 체력 정보 추가
     public bool hasFired;
+    public Vector33 b_position;
 }
 
 public class Vector33
